@@ -1,0 +1,3 @@
+# simple_shell
+This is a simple project made by me to learn how a basic shell works.
+More documentation will come...
