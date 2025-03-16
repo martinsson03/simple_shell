@@ -2,10 +2,13 @@
 #include <stdlib.h>
 
 #include "main.h"
+#include "debug.h"
 
-#define BUFFER_BLOCK_SIZE 1024
-#define ARG_LENGTH 64
-#define EXIT_ERROR 1
+#define BUFFER_BLOCK_SIZE 64
+#define BUFFER_ARG_BLOCK_SIZE 8
+#define TOKEN_DELIM " \t\r\n\a"
+
+#define ARG_LENGTH 8
 
 int main(int argc, char** argv){
     shell_loop();
@@ -19,6 +22,7 @@ void shell_loop(void){
     do {
         printf("> ");
         line = read_line();
+        print_line(line);
         args = split_line(line);
         //status = shell_excecute();
 
@@ -29,6 +33,9 @@ void shell_loop(void){
     } while (1);
 }
 
+/**
+ * @brief Reads a line from stdin using getchar()
+*/
 char* read_line(void){
     // Tmp variables
     int buffer_size = BUFFER_BLOCK_SIZE;
@@ -69,7 +76,39 @@ char* read_line(void){
     return (char*) 1;
 }
 
+/**
+ * @brief Function to tokanize input
+ */
 char** split_line(char* line){
-    return (char**) 1;
+    int buffer_size = BUFFER_ARG_BLOCK_SIZE;
+    char** tokens = (char**) malloc(sizeof(char*) * BUFFER_ARG_BLOCK_SIZE);
+    char* token;
+    int current_position = 0;
 
+    // Check for allocation error
+    if (!tokens){
+        perror("[Split Line]: Memory allocation failure\n");
+        exit(EXIT_FAILURE);
+    }
+
+    token = strtok(line, TOKEN_DELIM);
+    while(token != NULL){
+        tokens[current_position] = token;
+        current_position++;
+
+        // If we need to resize
+        if(current_position >= buffer_size){
+            buffer_size += BUFFER_ARG_BLOCK_SIZE;
+            tokens = realloc(tokens, sizeof(char*) * buffer_size);
+            if (!tokens){
+                perror("[Split Line]: Memory allocation failure\n");
+                exit(EXIT_FAILURE);
+            }
+        }
+        token = strtok(NULL, TOKEN_DELIM);
+    }
+    tokens[current_position] = NULL;
+    return tokens;
+ 
 }
+
