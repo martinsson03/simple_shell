@@ -13,6 +13,7 @@
 #define TOKEN_DELIM " \t\r\n\a"
 
 #define ARG_LENGTH 8
+#define TESTING 1
 
 int main(int argc, char** argv){
     shell_loop();
@@ -21,20 +22,19 @@ int main(int argc, char** argv){
 void shell_loop(void){
     char* line;
     char **args;
-    //int status;
+    int status;
 
     do {
         printf("> ");
         line = read_line();
-        print_line(line);
         args = split_line(line);
-        //status = shell_excecute();
+        status = launch(args);
 
         // Free line allocated in read_line
         free(line);
         // Free args allocated in split_line
         free(args);
-    } while (1);
+    } while (status);
 }
 
 /**
