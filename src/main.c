@@ -5,15 +5,13 @@
 #include <unistd.h>
 
 #include "main.h"
+#include "bultin_functions.h"
 #include "debug.h"
 
 
 #define BUFFER_BLOCK_SIZE 64
 #define BUFFER_ARG_BLOCK_SIZE 8
 #define TOKEN_DELIM " \t\r\n\a"
-
-#define ARG_LENGTH 8
-#define TESTING 1
 
 int main(int argc, char** argv){
     shell_loop();
@@ -28,7 +26,7 @@ void shell_loop(void){
         printf("> ");
         line = read_line();
         args = split_line(line);
-        status = launch(args);
+        status = excecute(args);
 
         // Free line allocated in read_line
         free(line);
@@ -78,6 +76,15 @@ char* read_line(void){
         }
     }
     return buffer;
+}
+
+/**
+ * @brief Function which choose what commands to be sent to launch and
+ * what commands are bultin
+ */
+int excecute(char** args){
+    // Change directory
+    return 1;
 }
 
 /**
