@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "main.h"
 #include "debug.h"
@@ -26,7 +27,7 @@ void shell_loop(void){
         args = split_line(line);
         //status = shell_excecute();
 
-        // Free args allocated in spli_line
+        // Free line allocated in read_line
         free(line);
         // Free args allocated in split_line
         free(args);
@@ -73,7 +74,7 @@ char* read_line(void){
             }
         }
     }
-    return (char*) 1;
+    return buffer;
 }
 
 /**
@@ -111,4 +112,3 @@ char** split_line(char* line){
     return tokens;
  
 }
-

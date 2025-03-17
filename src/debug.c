@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include "debug.h"
 
 /**
  * @brief Function do view buffer contents as text

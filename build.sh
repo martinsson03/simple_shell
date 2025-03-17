@@ -7,4 +7,11 @@ if [ ! -d "$BUILD_DIR" ]; then
     echo "Created build directory"
 fi
 
-gcc -O0 -g src/main.c -o build/simple_shell -Wall
+# If verbose info
+#gcc -O0 -g src/*.c -I./headers/ -o build/simple_shell -Wall -Wextra -Werror -v
+
+# Regular build
+gcc -O0 -g src/*.c -I./headers/ -o build/simple_shell -Wall
+
+# Show all header files 
+#gcc -H -O0 -g src/*.c -I./headers/ -o build/simple_shell -Wall
