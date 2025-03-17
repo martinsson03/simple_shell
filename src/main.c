@@ -1,9 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/wait.h>
+#include <unistd.h>
 
 #include "main.h"
 #include "debug.h"
+
 
 #define BUFFER_BLOCK_SIZE 64
 #define BUFFER_ARG_BLOCK_SIZE 8
@@ -111,4 +114,32 @@ char** split_line(char* line){
     tokens[current_position] = NULL;
     return tokens;
  
+}
+
+int launch(char** args){
+    pid_t pid;
+    int status;
+
+    // Fork this process
+    pid = fork();
+    // If 0, returned to the newly created child process
+    if (pid < 0){
+        perror("[Launch]:   Error when forking\n");
+        exit(EXIT_FAILURE);
+    }
+    // If "we" are the newly created child
+    else if(pid == 0){
+        if (execvp(args[0], args) == -1){
+            perror("[Launch (child)]:   Error when launching\n");
+        }
+        exit(EXIT_FAILURE);
+    }
+    // If we are the original process
+    else{
+        do{
+            waitpid(pid, &status, WUNTRACED);
+        }
+        while(!(WIFEXITED(status)) && !WIFSIGNALED(status)); 
+    }
+    return 1;
 }
