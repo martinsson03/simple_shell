@@ -83,8 +83,13 @@ char* read_line(void){
  * what commands are bultin
  */
 int excecute(char** args){
-    // Change directory
-    return 1;
+    for (int i = 0; i < BULTIN_FUNCTION_COUNT; i++){
+        // If we match with a bultin function
+        if(strcmp(bultin_commands_str[i], args[0]) == 0){
+            return bultin_commands_functions[i](args);
+        }
+    }
+    return launch(args);
 }
 
 /**
