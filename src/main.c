@@ -13,6 +13,8 @@
 #define BUFFER_ARG_BLOCK_SIZE 8
 #define TOKEN_DELIM " \t\r\n\a"
 
+#define MAX_PATH_LENGTH 256
+
 int main(int argc, char** argv){
     shell_loop();
 }
@@ -23,7 +25,9 @@ void shell_loop(void){
     int status;
 
     do {
-        printf("> ");
+        // Print the path to CWD
+        print_prompt();
+        
         line = read_line();
         args = split_line(line);
         status = excecute(args);
@@ -149,4 +153,18 @@ int launch(char** args){
         while(!(WIFEXITED(status)) && !WIFSIGNALED(status)); 
     }
     return 1;
+}
+
+/**
+ * @brief prints the path to cwd to stdout
+ */
+void print_prompt(void){
+    char cwd[MAX_PATH_LENGTH];
+
+    if(getcwd(cwd, sizeof(cwd)) == NULL){
+        perror("[Print Prompt]: Error when getting the path to cwd\n");
+        exit(EXIT_FAILURE);
+    }
+
+    printf("%s>", cwd);
 }
