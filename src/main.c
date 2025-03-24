@@ -87,13 +87,45 @@ char* read_line(void){
  * what commands are bultin
  */
 int excecute(char** args){
-    for (int i = 0; i < BULTIN_FUNCTION_COUNT; i++){
-        // If we match with a bultin function
-        if(strcmp(bultin_commands_str[i], args[0]) == 0){
-            return bultin_commands_functions[i](args);
+    char** args_i = args;
+    int pipe_index = -1;
+
+    while (args_i != NULL && *args_i != NULL) {
+        // If pipe is detected
+        if (strcmp(*args_i, "|") == 0) {
+            pipe_index = args_i - args;
+            // Inserts null
+            *args_i = NULL
+            // Make the pointer point to the first argument to the second process
+            args_i++;
+            break;
         }
+        args_i++;
     }
-    return launch(args);
+
+    // If no pipe
+    if (pipe_index == -1){
+        // Checking for all builtin functions
+        for (int i = 0; i < BULTIN_FUNCTION_COUNT; i++){
+            // If we match with a bultin function
+            if(strcmp(bultin_commands_str[i], args[0]) == 0){
+                return bultin_commands_functions[i](args);
+            }
+        }
+        return launch(args);
+    }
+    // If pipe
+    else{
+        int pipfd[2];
+        if (pipe(pipefd) == -1){
+            perror("[execute]:  pipe failed\n");
+            exit(EXIT_FAILURE);
+        }
+        launch_with_pipe1(args, pipfd);
+        return launch_with_pipe2(args_i, pipfd);
+    }
+
+
 }
 
 /**
@@ -172,4 +204,13 @@ void print_prompt(void){
     }
 
     printf("%s>", cwd);
+}
+
+
+launch_with_pipe1(char** args, int* pipefd){
+
+}
+
+launch_with_pipe2(char** args, int* pipefd){
+    
 }
