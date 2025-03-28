@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <unistd.h>
 #include "debug.h"
 
 /**
@@ -12,4 +13,12 @@ void print_line(char* line){
         i++;
     }
     printf("\n");
+}
+
+void dump_pipe(int pipefd){
+    // Dump pipefd
+    char c;
+        while(read(pipefd, &c, 1)){
+        printf("%c", c);
+    }
 }

@@ -129,8 +129,7 @@ int excecute(char** args){
         }
         
         launch(args, true, pipefd, 1);
-        close(pipefd[1]);
-        close(pipefd[0]);
+        dump_pipe(pipefd[0]);
         printf("First method done\n");
         return launch(args_i, true, pipefd, 2);
     }
