@@ -8,7 +8,7 @@ int (*bultin_commands_functions[]) (char**) = {&bultin_cd, &bultin_exit};
  * @brief Builtin change directory method
  */
 int bultin_cd(char** args){
-    if(!args[1] == NULL){
+    if(args[1] == NULL){
         chdir(args[1]);
     }
     return 1;

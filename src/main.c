@@ -3,6 +3,7 @@
 #include <string.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#include <stdbool.h>
 
 #include "main.h"
 #include "bultin_functions.h"
@@ -94,10 +95,13 @@ int excecute(char** args){
         // If pipe is detected
         if (strcmp(*args_i, "|") == 0) {
             pipe_index = args_i - args;
+            printf("Pipe index = %i\n", pipe_index);
             // Inserts null
-            *args_i = NULL
+            *args_i = NULL;
             // Make the pointer point to the first argument to the second process
             args_i++;
+            // Print the first argument after print
+            printf("First argument after pipe = %s\n", args_i[0]);
             break;
         }
         args_i++;
@@ -105,6 +109,7 @@ int excecute(char** args){
 
     // If no pipe
     if (pipe_index == -1){
+        printf("No pipe index detected\n");
         // Checking for all builtin functions
         for (int i = 0; i < BULTIN_FUNCTION_COUNT; i++){
             // If we match with a bultin function
@@ -112,21 +117,25 @@ int excecute(char** args){
                 return bultin_commands_functions[i](args);
             }
         }
-        return launch(args);
+        return launch(args, false, 0, 0);
     }
     // If pipe
     else{
-        int pipfd[2];
+        // Create fds for pipe
+        int pipefd[2];
         if (pipe(pipefd) == -1){
             perror("[execute]:  pipe failed\n");
             exit(EXIT_FAILURE);
         }
-        launch_with_pipe1(args, pipfd);
-        return launch_with_pipe2(args_i, pipfd);
+        
+        launch(args, true, pipefd, 1);
+        close(pipefd[1]);
+        close(pipefd[0]);
+        printf("First method done\n");
+        return launch(args_i, true, pipefd, 2);
     }
-
-
 }
+
 
 /**
  * @brief Function to tokanize input
@@ -164,7 +173,8 @@ char** split_line(char* line){
  
 }
 
-int launch(char** args){
+
+int launch(char** args, bool usePipe, int pipefd[], int processNumber){
     pid_t pid;
     int status;
 
@@ -177,6 +187,29 @@ int launch(char** args){
     }
     // If "we" are the newly created child
     else if(pid == 0){
+        // If we should redirect stdin or stdout
+        if(usePipe){
+            // If we are the "first" process in pipe
+            if(processNumber == 1){
+                printf("First process stdout changed to %i\n", pipefd[1]);
+                // Redirect stdout to the in port of the pipe
+                dup2(pipefd[1], STDOUT_FILENO);
+                // Close unused pipe end
+                close(pipefd[0]);
+                close(pipefd[1]);
+                printf("-----------------------------------");
+            }
+            // If we are the second process
+            else if(processNumber == 2){
+                printf("Second process stdin changed to %i\n", pipefd[0]);
+                dup2(pipefd[0], STDIN_FILENO);
+                // Close unused pipe end
+                close(pipefd[1]);
+                close(pipefd[0]);
+            }
+        }
+        // Become the new process
+        // If error
         if (execvp(args[0], args) == -1){
             perror("[Launch (child)]:   Error when launching\n");
         }
@@ -189,8 +222,14 @@ int launch(char** args){
         }
         while(!(WIFEXITED(status)) && !WIFSIGNALED(status)); 
     }
+
+    if (usePipe){
+        close(pipefd[0]);
+        close(pipefd[1]);
+    }
     return 1;
 }
+
 
 /**
  * @brief prints the path to cwd to stdout
@@ -204,13 +243,4 @@ void print_prompt(void){
     }
 
     printf("%s>", cwd);
-}
-
-
-launch_with_pipe1(char** args, int* pipefd){
-
-}
-
-launch_with_pipe2(char** args, int* pipefd){
-    
 }
