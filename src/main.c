@@ -4,10 +4,12 @@
     #include <sys/wait.h>
     #include <unistd.h>
     #include <stdbool.h>
+    #include <dirent.h>
 
     #include "main.h"
     #include "bultin_functions.h"
     #include "debug.h"
+
 
 
     #define BUFFER_BLOCK_SIZE 64
@@ -64,6 +66,16 @@
                 // Add null char
                 buffer[current_position] = '\0';
                 return buffer;
+            }
+
+            // If tab character is detected
+            if(current_char == '\t'){
+                DIR *d;
+                struct dirent *dir;
+                // Open the current directory
+                d = opendir(".");
+
+
             }
 
             buffer[current_position] = current_char;
