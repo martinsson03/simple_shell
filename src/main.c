@@ -61,6 +61,7 @@
 
         while(1){
             current_char = getchar();
+
             // If we should return
             if (current_char == EOF || current_char == '\n'){
                 // Add null char
@@ -70,10 +71,36 @@
 
             // If tab character is detected
             if(current_char == '\t'){
+                int old_current_position = current_position;
                 DIR *d;
                 struct dirent *dir;
                 // Open the current directory
                 d = opendir(".");
+                if(d){
+                    // Read as long as files exist and tab charater
+                    while(((dir = readdir(d)) != NULL) && (current_char == '\t')){
+                        // If we need to resize
+                        if (current_position + strlen(dir->d_name) >= buffer_size){
+                            buffer_size += BUFFER_BLOCK_SIZE;
+                            buffer = (char*) realloc(buffer, sizeof(char) * buffer_size);
+                            
+                            if (!buffer){
+                                perror("[Read Line]: Memory allocation failure\n");
+                                exit(EXIT_FAILURE);
+                            }
+
+                        }
+                        // Copy the next string
+                        strcpy(buffer + old_current_position, dir->d_name);
+                        // Fetch new character
+                        current_char = getchar();
+                    }
+                    closedir(d);
+                }
+                else{
+                    perror("[Read Line]: Error opening dir\n");
+                    exit(EXIT_FAILURE);
+                }
 
 
             }
@@ -107,13 +134,11 @@
             // If pipe is detected
             if (strcmp(*args_i, "|") == 0) {
                 pipe_index = args_i - args;
-                //printf("Pipe index = %i\n", pipe_index);
                 // Inserts null
                 *args_i = NULL;
                 // Make the pointer point to the first argument to the second process
                 args_i++;
                 // Print the first argument after print
-                //printf("First argument after pipe = %s\n", args_i[0]);
                 break;
             }
             args_i++;
@@ -248,5 +273,5 @@
             exit(EXIT_FAILURE);
         }
 
-        printf("%s>", cwd);
+        printf("[Simple shell]: %s>", cwd);
     }
