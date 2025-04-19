@@ -16,5 +16,6 @@ int bultin_cd(char** args){
 
 int bultin_exit(char** args){
     // Return 0 for exit
+    printf("Exiting...\n");
     return 0;
 }
