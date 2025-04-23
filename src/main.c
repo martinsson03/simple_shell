@@ -5,6 +5,7 @@
     #include <unistd.h>
     #include <stdbool.h>
     #include <dirent.h>
+    #include <termios.h>
 
     #include "main.h"
     #include "bultin_functions.h"
@@ -19,8 +20,17 @@
     #define MAX_PATH_LENGTH 256
 
     int main(int argc, char** argv){
+        enable_raw_mode();
         shell_loop();
     }
+
+    void enable_raw_mode() {
+        struct termios term;
+        tcgetattr(STDIN_FILENO, &term);           
+        term.c_lflag &= ~(ICANON | ECHO);         
+        tcsetattr(STDIN_FILENO, TCSANOW, &term);  
+    }
+
 
     void shell_loop(void){
         char* line;
@@ -84,45 +94,49 @@
                     // Read as long as files exist and tab charater
                     while(((dp = readdir(dir)) != NULL) && (current_char == '\t')){
                         // Ignore because we dont want to autofill . or ..
-                        printf("Fetched name: %s\n", dp->d_name);
-                        
-                        if(!strcmp(dp->d_name, ".") && !strcmp(dp->d_name, "..")){
-
+                        if(strcmp(dp->d_name, ".") != 0 && strcmp(dp->d_name, "..") != 0){
                             // If we need to resize
                             if (current_position + strlen(dp->d_name) >= buffer_size){
                                 buffer_size += BUFFER_BLOCK_SIZE;
                                 buffer = (char*) realloc(buffer, sizeof(char) * buffer_size);
-                                
+                                                   
                                 if (!buffer){
                                     perror("[Read Line]: Memory allocation failure\n");
                                     exit(EXIT_FAILURE);
                                 }
-
+                    
                             }
-                            printf("Auto filled %s\n", dp->d_name);
                             // Copy the next string
                             strcpy(buffer + old_current_position, dp->d_name);
+                            // Print autofilled info
+                            printf("%s", dp->d_name);
                             // Fetch new character
+                            
                             current_char = getchar();
                         }
-                        
                     }
+                    // Code to run once we know what to write (once no more )
+
+
                     closedir(dir);
                 }
 
             }
-
-            buffer[current_position] = current_char;
-            current_position++;
-
-            // If we should resize
-            if (current_position >= buffer_size){
-                buffer_size += BUFFER_BLOCK_SIZE;
-                buffer = (char*) realloc(buffer, sizeof(char) * buffer_size);
-                
-                if (!buffer){
-                    perror("[Read Line]: Memory allocation failure\n");
-                    exit(EXIT_FAILURE);
+            // Need to print because no echo
+            if(current_char >= '0' && current_char <= '9' ){
+                printf("%c", current_char);
+                buffer[current_position] = current_char;
+                current_position++;
+    
+                // If we should resize
+                if (current_position >= buffer_size){
+                    buffer_size += BUFFER_BLOCK_SIZE;
+                    buffer = (char*) realloc(buffer, sizeof(char) * buffer_size);
+                    
+                    if (!buffer){
+                        perror("[Read Line]: Memory allocation failure\n");
+                        exit(EXIT_FAILURE);
+                    }
                 }
             }
         }
