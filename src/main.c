@@ -69,39 +69,46 @@
                 return buffer;
             }
 
-            // If tab character is detected
+            // If tab character is detected, we want to autocomplete
             if(current_char == '\t'){
                 int old_current_position = current_position;
-                DIR *d;
-                struct dirent *dir;
-                // Open the current directory
-                d = opendir(".");
-                if(d){
-                    // Read as long as files exist and tab charater
-                    while(((dir = readdir(d)) != NULL) && (current_char == '\t')){
-                        // If we need to resize
-                        if (current_position + strlen(dir->d_name) >= buffer_size){
-                            buffer_size += BUFFER_BLOCK_SIZE;
-                            buffer = (char*) realloc(buffer, sizeof(char) * buffer_size);
-                            
-                            if (!buffer){
-                                perror("[Read Line]: Memory allocation failure\n");
-                                exit(EXIT_FAILURE);
-                            }
+                DIR *dir;
+                struct dirent *dp;
 
-                        }
-                        // Copy the next string
-                        strcpy(buffer + old_current_position, dir->d_name);
-                        // Fetch new character
-                        current_char = getchar();
-                    }
-                    closedir(d);
-                }
-                else{
+                // Open the current directory
+                if ((dir = opendir(".")) == NULL){
                     perror("[Read Line]: Error opening dir\n");
                     exit(EXIT_FAILURE);
                 }
+                else{
+                    // Read as long as files exist and tab charater
+                    while(((dp = readdir(dir)) != NULL) && (current_char == '\t')){
+                        // Ignore because we dont want to autofill . or ..
+                        printf("Fetched name: %s\n", dp->d_name);
+                        
+                        if(!strcmp(dp->d_name, ".") && !strcmp(dp->d_name, "..")){
 
+                            // If we need to resize
+                            if (current_position + strlen(dp->d_name) >= buffer_size){
+                                buffer_size += BUFFER_BLOCK_SIZE;
+                                buffer = (char*) realloc(buffer, sizeof(char) * buffer_size);
+                                
+                                if (!buffer){
+                                    perror("[Read Line]: Memory allocation failure\n");
+                                    exit(EXIT_FAILURE);
+                                }
+
+                            }
+                            printf("Auto filled %s\n", dp->d_name);
+                            // Copy the next string
+                            strcpy(buffer + old_current_position, dp->d_name);
+                            // Fetch new character
+                            current_char = getchar();
+                        }
+                        
+                    }
+                    closedir(dir);
+                }
 
             }
 
