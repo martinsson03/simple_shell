@@ -12,7 +12,7 @@ Currently, it supports the following:
 - GCC (GNU Compiler Collection) is required to build the project.
 
 ### How to run
-1. Build the shell using the build script:
+Build the shell using the build script:
 
 ```bash
 ./build.sh
