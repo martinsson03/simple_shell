@@ -1,21 +1,26 @@
 # Simple Shell
-This is a simple project made by me to learn how a basic shell works and to interact with the Linux Kernal.
+This is a simple project I made to learn how a basic shell works and how it interacts with the Linux kernel.
 
-### Functions
-Currently it does support the following:
-- The cd command
+### Features
+Currently, it supports the following:
+- The `cd` command
 - Exiting to the original shell
 - Starting processes and waiting for them to finish
 - Piping data between processes
 
-### How to run
-To build the shell, gcc is needed. Run the build script:
-´´´
-./build.sh
-´´´
-Then, run the run script:
-´´´
-./run.sh
-´´´
+### Requirements
+- GCC (GNU Compiler Collection) is required to build the project.
 
-Now you are inside my shell. Feel free to play around!
+### How to run
+1. Build the shell using the build script:
+
+```bash
+./build.sh
+```
+
+Then, run the start script:
+```bash
+./run.sh
+```
+
+Now you are inside my shell. Feel free to explore and try out commands!
