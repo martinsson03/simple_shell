@@ -1,5 +1,6 @@
 #include <unistd.h> 
 #include "bultin_functions.h"
+#include <stdio.h>
 
 char* bultin_commands_str[] = {"cd", "exit"};
 int (*bultin_commands_functions[]) (char**) = {&bultin_cd, &bultin_exit};
